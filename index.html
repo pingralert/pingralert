@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PingRAlert — Never Miss a Market Move</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #090d18;
+    --bg2: #0d1425;
+    --teal: #00d485;
+    --teal-dim: rgba(0, 212, 133, 0.12);
+    --white: #e8eeff;
+    --muted: #5a6a8a;
+    --card: rgba(255,255,255,0.04);
+    --border: rgba(255,255,255,0.07);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  /* GRID */
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* GLOW */
+  .glow {
+    position: fixed;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,212,133,0.08) 0%, transparent 70%);
+    top: -200px;
+    right: -200px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow2 {
+    position: fixed;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,100,255,0.06) 0%, transparent 70%);
+    bottom: -100px;
+    left: -100px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 48px;
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(10px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: -0.02em;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,212,133,0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .nav-cta {
+    background: var(--teal);
+    color: #000;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 10px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  .nav-cta:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* HERO */
+  .hero {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 100px 24px 80px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--teal-dim);
+    border: 1px solid rgba(0,212,133,0.25);
+    color: var(--teal);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 6px 14px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+    letter-spacing: 0.02em;
+  }
+
+  .badge-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+  }
+
+  h1 span { color: var(--teal); }
+
+  .hero-sub {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 560px;
+    margin: 0 auto 48px;
+    font-weight: 300;
+  }
+
+  .hero-btns {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--teal);
+    color: #000;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 16px 32px;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.2s;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,212,133,0.25); }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card);
+    color: var(--white);
+    font-weight: 500;
+    font-size: 1rem;
+    padding: 16px 32px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover { background: rgba(255,255,255,0.07); transform: translateY(-2px); }
+
+  /* CHART ANIMATION */
+  .chart-wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 700px;
+    margin: 60px auto 0;
+    padding: 0 24px;
+  }
+
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+  }
+
+  .chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .chart-title { font-size: 0.85rem; color: var(--muted); }
+  .chart-price { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.4rem; }
+  .chart-change { color: var(--teal); font-size: 0.85rem; font-weight: 500; }
+
+  svg.chart { width: 100%; height: 80px; }
+
+  .chart-line {
+    fill: none;
+    stroke: var(--teal);
+    stroke-width: 2;
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawLine 2s ease forwards 0.5s;
+  }
+
+  .chart-fill {
+    opacity: 0;
+    animation: fadeIn 0.5s ease forwards 2.2s;
+  }
+
+  @keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+
+  .alert-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,212,133,0.1);
+    border: 1px solid rgba(0,212,133,0.2);
+    border-radius: 100px;
+    padding: 8px 16px;
+    font-size: 0.82rem;
+    color: var(--teal);
+    margin-top: 16px;
+    animation: slideUp 0.5s ease forwards 2.5s;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  @keyframes slideUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* FEATURES */
+  .section {
+    position: relative;
+    z-index: 1;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 100px 24px;
+  }
+
+  .section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    letter-spacing: -0.02em;
+    margin-bottom: 60px;
+    max-width: 500px;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .feature-card:hover {
+    border-color: rgba(0,212,133,0.25);
+    transform: translateY(-3px);
+  }
+
+  .feature-icon {
+    width: 44px;
+    height: 44px;
+    background: var(--teal-dim);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin-bottom: 18px;
+  }
+
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-size: 0.88rem;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* COMPARISON */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 40px;
+  }
+
+  .compare-table th {
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 16px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .compare-table th:not(:first-child) { text-align: center; }
+
+  .compare-table th.highlight {
+    color: var(--teal);
+  }
+
+  .compare-table td {
+    padding: 14px 20px;
+    font-size: 0.88rem;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .compare-table td:not(:first-child) { text-align: center; }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+
+  .tick { color: var(--teal); font-size: 1.1rem; }
+  .cross { color: #ff4444; font-size: 1.1rem; }
+  .highlight-col { color: var(--white) !important; }
+
+  /* ASSETS */
+  .assets-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 40px;
+  }
+
+  .asset-tag {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: all 0.2s;
+  }
+
+  .asset-tag:hover {
+    border-color: rgba(0,212,133,0.3);
+    color: var(--teal);
+  }
+
+  /* CTA */
+  .cta-section {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 80px 24px 120px;
+  }
+
+  .cta-box {
+    max-width: 600px;
+    margin: 0 auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 60px 40px;
+    backdrop-filter: blur(10px);
+  }
+
+  .cta-box h2 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(1.8rem, 4vw, 2.4rem);
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .cta-box p {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 36px;
+    line-height: 1.6;
+  }
+
+  .price-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+
+  .price-tag span { font-size: 1.2rem; color: var(--muted); font-weight: 400; }
+
+  /* FOOTER */
+  footer {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    padding: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+
+  /* ANIMATIONS */
+  .fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .fade-up:nth-child(1) { animation-delay: 0.1s; }
+  .fade-up:nth-child(2) { animation-delay: 0.2s; }
+  .fade-up:nth-child(3) { animation-delay: 0.3s; }
+  .fade-up:nth-child(4) { animation-delay: 0.4s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .section { padding: 60px 20px; }
+    .cta-box { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="glow"></div>
+<div class="glow2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">🔔</div>
+    PingRAlert
+  </div>
+  <a href="https://t.me/pingralert_bot" class="nav-cta">Open in Telegram →</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="badge fade-up">
+    <div class="badge-dot"></div>
+    Live on Telegram
+  </div>
+  <h1 class="fade-up">Never miss a<br><span>market move</span> again.</h1>
+  <p class="hero-sub fade-up">Track Bitcoin, Tesla, Gold, FTSE 100 and more — all in one Telegram bot. Instant alerts, zero noise.</p>
+  <div class="hero-btns fade-up">
+    <a href="https://t.me/pingralert_bot" class="btn-primary">
+      ⚡ Start for free
+    </a>
+  </div>
+</div>
+
+<!-- CHART PREVIEW -->
+<div class="chart-wrapper">
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">BTC / USD</div>
+        <div class="chart-price">$87,432 <span class="chart-change">+4.2%</span></div>
+      </div>
+      <div style="font-size: 0.8rem; color: var(--muted);">⚡ Live price</div>
+    </div>
+    <svg class="chart" viewBox="0 0 600 80" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#00d485" stop-opacity="0.15"/>
+          <stop offset="100%" stop-color="#00d485" stop-opacity="0"/>
+        </linearGradient>
+      </defs>
+      <path class="chart-fill" d="M0,70 L60,58 L120,62 L180,45 L240,38 L300,42 L360,28 L420,18 L480,24 L540,10 L600,5 L600,80 L0,80 Z" fill="url(#grad)"/>
+      <path class="chart-line" d="M0,70 L60,58 L120,62 L180,45 L240,38 L300,42 L360,28 L420,18 L480,24 L540,10 L600,5"/>
+    </svg>
+    <div class="alert-pill">🚀 BTC Alert fired — moved +4.2% · 05 Mar 2026, 14:32 UTC</div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section">
+  <div class="section-label">Features</div>
+  <div class="section-title">Everything a trader needs. Nothing they don't.</div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <div class="feature-title">Alerts that never expire</div>
+      <div class="feature-desc">Unlike Binance's 90-day limit, your alerts stay active forever. Set it once and forget it.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">♾️</div>
+      <div class="feature-title">Unlimited alerts</div>
+      <div class="feature-desc">No 50 alert cap. Watch as many assets as you want with no restrictions.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🛡️</div>
+      <div class="feature-title">Smart cooldown</div>
+      <div class="feature-desc">No spam. Our cooldown system means you get one clean alert per move, not 38 in a morning.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Everything in one place</div>
+      <div class="feature-desc">Crypto, stocks, commodities, indices and forex — all tracked in a single Telegram bot.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📈</div>
+      <div class="feature-title">Percentage move alerts</div>
+      <div class="feature-desc">Alert me when BTC moves 5% in either direction. Permanent and repeating.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📋</div>
+      <div class="feature-title">Daily summary</div>
+      <div class="feature-desc">Get a morning snapshot of your entire watchlist — movers, losers, and stable assets.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ASSETS -->
+<div class="section" style="padding-top: 0;">
+  <div class="section-label">Coverage</div>
+  <div class="section-title">Track anything.</div>
+  <div class="assets-row">
+    <div class="asset-tag">₿ Bitcoin</div>
+    <div class="asset-tag">Ξ Ethereum</div>
+    <div class="asset-tag">◎ Solana</div>
+    <div class="asset-tag">✕ XRP</div>
+    <div class="asset-tag">Ð Dogecoin</div>
+    <div class="asset-tag">🍎 Apple</div>
+    <div class="asset-tag">⚡ Tesla</div>
+    <div class="asset-tag">🟢 NVIDIA</div>
+    <div class="asset-tag">🪟 Microsoft</div>
+    <div class="asset-tag">📦 Amazon</div>
+    <div class="asset-tag">🥇 Gold</div>
+    <div class="asset-tag">🥈 Silver</div>
+    <div class="asset-tag">🛢️ Oil</div>
+    <div class="asset-tag">📊 S&P 500</div>
+    <div class="asset-tag">📊 FTSE 100</div>
+    <div class="asset-tag">📊 NASDAQ</div>
+    <div class="asset-tag">💱 GBP/USD</div>
+    <div class="asset-tag">+ more</div>
+  </div>
+</div>
+
+<!-- COMPARISON -->
+<div class="section" style="padding-top: 0;">
+  <div class="section-label">Comparison</div>
+  <div class="section-title">Why PingRAlert?</div>
+  <table class="compare-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th class="highlight">PingRAlert</th>
+        <th>Binance</th>
+        <th>Trading 212</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Alerts never expire</td>
+        <td class="highlight-col"><span class="tick">✓</span></td>
+        <td><span class="cross">✗</span> 90 days</td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr>
+        <td>Unlimited alerts</td>
+        <td class="highlight-col"><span class="tick">✓</span></td>
+        <td><span class="cross">✗</span> 50 max</td>
+        <td><span class="cross">✗</span> 100 max</td>
+      </tr>
+      <tr>
+        <td>No spam alerts</td>
+        <td class="highlight-col"><span class="tick">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr>
+        <td>Crypto + Stocks + Commodities</td>
+        <td class="highlight-col"><span class="tick">✓</span></td>
+        <td>Crypto only</td>
+        <td>Stocks only</td>
+      </tr>
+      <tr>
+        <td>Lives in Telegram</td>
+        <td class="highlight-col"><span class="tick">✓</span></td>
+        <td><span class="cross">✗</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+      <tr>
+        <td>Percentage move alerts</td>
+        <td class="highlight-col"><span class="tick">✓</span></td>
+        <td><span class="tick">✓</span></td>
+        <td><span class="cross">✗</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- CTA -->
+<div class="cta-section">
+  <div class="cta-box">
+    <div class="price-tag">£9.99<span>/mo</span></div>
+    <h2>Your edge starts here.</h2>
+    <p>Join traders who never miss a move. Set up in 30 seconds — no app download, no account, just Telegram.</p>
+    <a href="https://t.me/pingralert_bot" class="btn-primary" style="font-size: 1.1rem; padding: 18px 40px;">
+      ⚡ Get started on Telegram
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 PingRAlert · <a href="https://t.me/pingralert_bot" style="color: var(--teal); text-decoration: none;">@pingralert_bot</a> · For informational purposes only. Not financial advice.</p>
+</footer>
+
+</body>
+</html>
