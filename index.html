@@ -4,356 +4,551 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PingRAlert — Clean Telegram Alerts for Markets</title>
-  <meta name="description" content="Permanent percentage-move alerts for Bitcoin, stocks, gold, indices and more — delivered straight to Telegram. No spam, no expiry, no dashboard hassle."/>
+  <meta name="description" content="Permanent percentage-move alerts for crypto, stocks, indices, commodities and forex — delivered straight to Telegram. Clean cooldown, no spam floods."/>
+  <meta name="theme-color" content="#0a0e1a"/>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
   <style>
-    :root {
-      --bg: #0a0e1a;
-      --teal: #00d485;
-      --teal-dim: rgba(0,212,133,0.12);
-      --teal-glow: rgba(0,212,133,0.14);
-      --white: #f1f5f9;
-      --muted: #9ca3af;
-      --card: rgba(255,255,255,0.045);
-      --border: rgba(255,255,255,0.085);
-      --radius: 16px;
+    :root{
+      --bg:#0a0e1a;
+      --teal:#00d485;
+      --teal-dim:rgba(0,212,133,.12);
+      --teal-glow:rgba(0,212,133,.14);
+      --white:#f1f5f9;
+      --muted:#9aa4b2;
+      --card:rgba(255,255,255,.045);
+      --border:rgba(255,255,255,.085);
+      --radius:16px;
+      --shadow:0 16px 60px rgba(0,0,0,.48);
+      --shadowTeal:0 14px 40px rgba(0,212,133,.26);
+      --max:1100px;
     }
 
-    * { margin:0; padding:0; box-sizing:border-box; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg);
-      color: var(--white);
-      font-family: 'DM Sans', system-ui, sans-serif;
-      line-height: 1.6;
-      min-height: 100vh;
-      overflow-x: hidden;
+    *{margin:0;padding:0;box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      background:var(--bg);
+      color:var(--white);
+      font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      line-height:1.6;
+      min-height:100vh;
+      overflow-x:hidden;
     }
+    a{color:inherit}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 1.5rem}
+    .divider{border-top:1px solid var(--border);opacity:.9}
 
-    .grid-bg {
-      position: fixed;
-      inset: 0;
+    /* Background */
+    .grid-bg{
+      position:fixed; inset:0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
-      background-size: 70px 70px;
-      pointer-events: none;
-      z-index: -3;
+        linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+      background-size:70px 70px;
+      pointer-events:none;
+      z-index:-4;
+    }
+    .glow{
+      position:fixed;
+      width:520px;height:520px;
+      background:radial-gradient(circle at 30% 30%, var(--teal-glow) 0%, transparent 65%);
+      top:-170px; right:-170px;
+      pointer-events:none;
+      z-index:-3;
+      opacity:.75;
+    }
+    .glow2{
+      position:fixed;
+      width:420px;height:420px;
+      background:radial-gradient(circle at 70% 70%, rgba(0,100,255,.10) 0%, transparent 65%);
+      bottom:-150px; left:-150px;
+      pointer-events:none;
+      z-index:-3;
+      opacity:.6;
     }
 
-    .glow {
-      position: fixed;
-      width: 480px; height: 480px;
-      background: radial-gradient(circle at 30% 30%, var(--teal-glow) 0%, transparent 65%);
-      top: -140px; right: -140px;
-      pointer-events: none;
-      z-index: -2;
-      opacity: 0.7;
+    /* Nav */
+    nav{
+      position:sticky; top:0; z-index:100;
+      background:rgba(10,14,26,.82);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+    }
+    .nav-inner{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      padding:1.05rem 0;
+    }
+    .logo{
+      display:flex; align-items:center; gap:.8rem;
+      font-family:"Outfit",sans-serif;
+      font-weight:800;
+      font-size:1.32rem;
+      text-decoration:none;
+      white-space:nowrap;
+    }
+    .nav-links{
+      display:none;
+      align-items:center;
+      gap:1rem;
+      color:var(--muted);
+      font-size:.95rem;
+    }
+    .nav-links a{
+      text-decoration:none;
+      padding:.45rem .65rem;
+      border-radius:12px;
+      transition:all .2s ease;
+    }
+    .nav-links a:hover{
+      background:rgba(255,255,255,.04);
+      color:var(--white);
+    }
+    .nav-cta{
+      background:var(--teal);
+      color:#000;
+      font-weight:800;
+      padding:.75rem 1.2rem;
+      border-radius:12px;
+      text-decoration:none;
+      font-size:.95rem;
+      transition:all .25s ease;
+      white-space:nowrap;
+    }
+    .nav-cta:hover{transform:translateY(-1px);box-shadow:var(--shadowTeal);opacity:.96}
+    .nav-cta:focus-visible,.btn:focus-visible{
+      outline:2px solid rgba(0,212,133,.55);
+      outline-offset:3px;
     }
 
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(10,14,26,0.82);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+    /* Hero */
+    header.hero{padding:6.5rem 0 4.5rem}
+    .hero-grid{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:2.2rem;
+      align-items:center;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:.6rem;
+      background:var(--teal-dim);
+      border:1px solid rgba(0,212,133,.28);
+      color:var(--teal);
+      padding:.55rem 1.05rem;
+      border-radius:999px;
+      font-size:.88rem;
+      font-weight:800;
+      width:max-content;
+    }
+    .badge-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:var(--teal);
+      animation:pulse 2.3s infinite;
+    }
+    @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(.8)}}
+    h1{
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      font-size:clamp(2.55rem, 6.8vw, 4.6rem);
+      line-height:1.06;
+      letter-spacing:-.02em;
+      margin-top:1.1rem;
+    }
+    h1 span{color:var(--teal)}
+    .hero-sub{
+      color:var(--muted);
+      font-size:clamp(1.08rem, 2.4vw, 1.26rem);
+      max-width:42rem;
+      margin-top:1.05rem;
+    }
+    .ctas{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.9rem;
+      margin-top:1.55rem;
+      align-items:center;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:.65rem;
+      padding:1.05rem 1.55rem;
+      border-radius:14px;
+      font-weight:900;
+      font-size:1.05rem;
+      text-decoration:none;
+      transition:all .25s ease;
+      white-space:nowrap;
+    }
+    .btn.primary{background:var(--teal);color:#000}
+    .btn.primary:hover{transform:translateY(-3px);box-shadow:var(--shadowTeal)}
+    .btn.ghost{
+      background:rgba(255,255,255,.04);
+      border:1px solid var(--border);
+      color:var(--white);
+    }
+    .btn.ghost:hover{transform:translateY(-3px);border-color:rgba(0,212,133,.35)}
+    .hero-note{
+      margin-top:.95rem;
+      color:var(--muted);
+      font-size:.92rem;
+    }
+    .trust{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.7rem;
+      margin-top:1.15rem;
+    }
+    .trust-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:.55rem;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:.5rem .85rem;
+      font-size:.92rem;
+      color:var(--muted);
+      transition:all .2s ease;
+    }
+    .trust-pill strong{color:var(--white);font-weight:900}
+    .trust-pill:hover{border-color:rgba(0,212,133,.28);color:var(--white)}
+
+    /* Telegram Preview */
+    .preview{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:1.35rem;
+      backdrop-filter:blur(10px);
+      box-shadow:var(--shadow);
+    }
+    .preview-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:1.15rem;
+    }
+    .preview-label{color:var(--muted);font-size:.9rem;font-weight:700}
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.35rem .7rem;
+      border-radius:999px;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      color:var(--muted);
+      font-size:.85rem;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .chip .dot{
+      width:7px;height:7px;border-radius:50%;
+      background:var(--teal);
+      box-shadow:0 0 0 4px rgba(0,212,133,.12);
+    }
+    .bubble{
+      background:rgba(255,255,255,.035);
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:1rem 1.1rem;
+      margin-bottom:.9rem;
+    }
+    .bubble-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:baseline;
+      gap:.8rem;
+      margin-bottom:.5rem;
+    }
+    .bubble-header strong{
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      letter-spacing:.1px;
+    }
+    .tag{
+      background:rgba(0,212,133,.15);
+      border:1px solid rgba(0,212,133,.22);
+      color:var(--teal);
+      font-size:.82rem;
+      font-weight:900;
+      padding:.22rem .62rem;
+      border-radius:999px;
+      white-space:nowrap;
+    }
+    .bubble p{color:rgba(241,245,249,.92)}
+    .bubble small{display:block;margin-top:.65rem;color:var(--muted);font-size:.88rem}
+    .preview-foot{
+      text-align:center;
+      color:var(--muted);
+      font-size:.84rem;
+      margin-top:.65rem;
     }
 
-    .nav-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 1.1rem 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+    /* Sections */
+    section.section{padding:6.5rem 0}
+    .section-label{
+      color:var(--teal);
+      font-size:.9rem;
+      font-weight:900;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      margin-bottom:1rem;
+    }
+    .section-title{
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      font-size:clamp(1.95rem, 4.7vw, 3.1rem);
+      margin-bottom:1.05rem;
+      letter-spacing:-.02em;
+    }
+    .section-sub{
+      color:var(--muted);
+      max-width:56rem;
+      font-size:1.05rem;
     }
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      font-family: 'Outfit', sans-serif;
-      font-weight: 800;
-      font-size: 1.35rem;
-      text-decoration: none;
+    /* Feature grid */
+    .features{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:1.25rem;
+      margin-top:2rem;
+    }
+    .feature{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.55rem;
+      transition:all .25s ease;
+    }
+    .feature:hover{transform:translateY(-5px);border-color:rgba(0,212,133,.40)}
+    .feature .icon{font-size:2.25rem;margin-bottom:.9rem}
+    .feature h3{
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      font-size:1.18rem;
+      margin-bottom:.55rem;
+    }
+    .feature p{color:var(--muted)}
+
+    /* How it works */
+    .steps{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:1rem;
+      margin-top:2rem;
+    }
+    .step{
+      display:flex;
+      gap:1rem;
+      align-items:flex-start;
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.25rem 1.2rem;
+      transition:all .25s ease;
+    }
+    .step:hover{transform:translateY(-3px);border-color:rgba(0,212,133,.35)}
+    .num{
+      width:40px;height:40px;border-radius:12px;
+      background:var(--teal);color:#000;
+      display:grid;place-items:center;
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      flex:0 0 auto;
+    }
+    .step h4{
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      margin-bottom:.25rem;
+      font-size:1.12rem;
+    }
+    .step p{color:var(--muted)}
+
+    /* Coverage tags */
+    .assets{
+      display:flex;
+      flex-wrap:wrap;
+      gap:.8rem;
+      margin-top:1.6rem;
+    }
+    .asset{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:999px;
+      padding:.6rem 1.2rem;
+      font-size:.92rem;
+      color:var(--muted);
+      transition:all .2s ease;
+    }
+    .asset:hover{border-color:var(--teal);color:var(--white)}
+
+    /* Pricing */
+    .pricing{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:1.25rem;
+      margin-top:2rem;
+    }
+    .price-card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius:22px;
+      padding:1.8rem 1.6rem;
+      backdrop-filter:blur(12px);
+      box-shadow:var(--shadow);
+    }
+    .price-top{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:1rem;
+      margin-bottom:1rem;
+    }
+    .plan{
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      font-size:1.25rem;
+    }
+    .plan-badge{
+      display:inline-flex;
+      align-items:center;
+      gap:.5rem;
+      padding:.35rem .7rem;
+      border-radius:999px;
+      background:rgba(0,212,133,.10);
+      border:1px solid rgba(0,212,133,.24);
+      color:var(--teal);
+      font-weight:900;
+      font-size:.85rem;
+      white-space:nowrap;
+    }
+    .price{
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      font-size:3.2rem;
+      letter-spacing:-.02em;
+      color:var(--teal);
+      margin:.25rem 0 .2rem;
+    }
+    .price span{font-size:1.05rem;color:var(--muted);font-weight:900}
+    .price-sub{color:var(--muted);margin-bottom:1.1rem}
+    ul.list{list-style:none;display:flex;flex-direction:column;gap:.6rem;margin-top:.9rem}
+    ul.list li{
+      display:flex;gap:.65rem;align-items:flex-start;
+      color:rgba(241,245,249,.92);
+      font-size:.98rem;
+    }
+    .check{
+      width:18px;height:18px;flex:0 0 auto;
+      border-radius:6px;
+      background:rgba(0,212,133,.16);
+      border:1px solid rgba(0,212,133,.30);
+      display:grid;place-items:center;
+      color:var(--teal);
+      font-weight:900;
+      margin-top:.15rem;
+      line-height:1;
     }
 
-    .nav-cta {
-      background: var(--teal);
-      color: #000;
-      font-weight: 700;
-      padding: 0.75rem 1.4rem;
-      border-radius: 12px;
-      text-decoration: none;
-      font-size: 0.95rem;
-      transition: all 0.25s ease;
+    /* FAQ */
+    .faq{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:.9rem;
+      margin-top:2rem;
+      max-width:900px;
+    }
+    details.q{
+      background:rgba(255,255,255,.03);
+      border:1px solid var(--border);
+      border-radius:var(--radius);
+      padding:1.05rem 1.1rem;
+      transition:all .2s ease;
+    }
+    details.q:hover{border-color:rgba(0,212,133,.28)}
+    details.q summary{
+      cursor:pointer;
+      list-style:none;
+      font-family:"Outfit",sans-serif;
+      font-weight:900;
+      font-size:1.05rem;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:1rem;
+    }
+    details.q summary::-webkit-details-marker{display:none}
+    details.q p{margin-top:.7rem;color:var(--muted)}
+    .chev{
+      width:30px;height:30px;border-radius:10px;
+      border:1px solid var(--border);
+      display:grid;place-items:center;
+      color:var(--muted);
+      transition:transform .2s ease;
+      flex:0 0 auto;
+    }
+    details[open] .chev{transform:rotate(180deg)}
+
+    footer{
+      text-align:center;
+      padding:3.3rem 1.5rem 2.2rem;
+      color:var(--muted);
+      border-top:1px solid var(--border);
+      font-size:.92rem;
+    }
+    footer a{color:var(--teal);text-decoration:none;font-weight:900}
+
+    /* Reveal */
+    .reveal{opacity:0;transform:translateY(34px);transition:all .9s ease}
+    .reveal.active{opacity:1;transform:translateY(0)}
+
+    /* Responsive */
+    @media (min-width: 780px){
+      .nav-links{display:flex}
+      header.hero{padding:8.2rem 0 5.2rem}
+      .hero-grid{grid-template-columns:1.05fr .95fr; gap:2.6rem}
+      .features{grid-template-columns:repeat(3, 1fr)}
+      .steps{grid-template-columns:repeat(3, 1fr)}
+      .pricing{grid-template-columns:repeat(2, 1fr)}
+      section.section{padding:7.5rem 0}
+      .wrap{padding:0 2rem}
     }
 
-    .nav-cta:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 30px rgba(0,212,133,0.3);
+    @media (max-width: 520px){
+      .btn{width:100%}
+      .ctas{flex-direction:column;align-items:stretch}
+      .badge{width:100%;justify-content:center}
     }
 
-    main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
-
-    .hero {
-      padding: 7rem 0 5rem;
-      text-align: center;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
-      background: var(--teal-dim);
-      border: 1px solid rgba(0,212,133,0.28);
-      color: var(--teal);
-      padding: 0.55rem 1.1rem;
-      border-radius: 999px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      margin-bottom: 1.8rem;
-    }
-
-    .badge-dot {
-      width: 8px; height: 8px;
-      background: var(--teal);
-      border-radius: 50%;
-      animation: pulse 2.3s infinite;
-    }
-
-    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(0.8); } }
-
-    h1 {
-      font-family: 'Outfit', sans-serif;
-      font-weight: 800;
-      font-size: clamp(2.6rem, 8vw, 4.8rem);
-      line-height: 1.08;
-      margin-bottom: 1.4rem;
-    }
-
-    h1 span { color: var(--teal); }
-
-    .hero-sub {
-      color: var(--muted);
-      font-size: clamp(1.1rem, 2.5vw, 1.28rem);
-      max-width: 640px;
-      margin: 0 auto 2.2rem;
-    }
-
-    .btn-primary {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.7rem;
-      background: var(--teal);
-      color: #000;
-      font-weight: 700;
-      font-size: 1.1rem;
-      padding: 1.1rem 2.4rem;
-      border-radius: 14px;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 40px rgba(0,212,133,0.32);
-    }
-
-    .telegram-preview {
-      margin: 4rem auto 0;
-      max-width: 520px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 1.4rem;
-      backdrop-filter: blur(10px);
-    }
-
-    .preview-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.2rem;
-    }
-
-    .preview-label {
-      color: var(--muted);
-      font-size: 0.9rem;
-      font-weight: 600;
-    }
-
-    .msg-bubble {
-      background: rgba(255,255,255,0.035);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 1rem 1.1rem;
-      margin-bottom: 0.9rem;
-    }
-
-    .msg-bubble strong { color: var(--white); }
-
-    .msg-tag {
-      float: right;
-      background: rgba(0,212,133,0.15);
-      color: var(--teal);
-      font-size: 0.82rem;
-      font-weight: 700;
-      padding: 0.25rem 0.7rem;
-      border-radius: 999px;
-    }
-
-    .preview-footer {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.84rem;
-      margin-top: 1rem;
-    }
-
-    .section {
-      padding: 7rem 0;
-    }
-
-    .section-label {
-      color: var(--teal);
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-    }
-
-    .section-title {
-      font-family: 'Outfit', sans-serif;
-      font-weight: 800;
-      font-size: clamp(2rem, 5vw, 3.2rem);
-      margin-bottom: 1.5rem;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.4rem;
-      margin-top: 2rem;
-    }
-
-    .feature {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 1.6rem;
-      transition: all 0.3s ease;
-    }
-
-    .feature:hover {
-      transform: translateY(-5px);
-      border-color: rgba(0,212,133,0.4);
-    }
-
-    .feature-icon { font-size: 2.4rem; margin-bottom: 1rem; }
-
-    .feature h3 {
-      font-family: 'Outfit', sans-serif;
-      font-weight: 700;
-      font-size: 1.18rem;
-      margin-bottom: 0.6rem;
-    }
-
-    .assets {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8rem;
-      margin-top: 2.5rem;
-      justify-content: center;
-    }
-
-    .asset-pill {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 999px;
-      padding: 0.6rem 1.3rem;
-      font-size: 0.92rem;
-      transition: all 0.25s;
-    }
-
-    .asset-pill:hover {
-      border-color: var(--teal);
-      color: var(--teal);
-    }
-
-    .pricing-box {
-      margin: 3rem auto 0;
-      max-width: 620px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 3.5rem 2rem;
-      text-align: center;
-      backdrop-filter: blur(12px);
-    }
-
-    .price {
-      font-family: 'Outfit', sans-serif;
-      font-size: 4.2rem;
-      font-weight: 800;
-      color: var(--teal);
-      margin: 1rem 0;
-    }
-
-    .price small {
-      font-size: 1.4rem;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    footer {
-      text-align: center;
-      padding: 4rem 1.5rem 2rem;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      font-size: 0.9rem;
-    }
-
-    footer a { color: var(--teal); text-decoration: none; }
-
-    .reveal { opacity: 0; transform: translateY(35px); transition: all 0.9s ease; }
-    .reveal.active { opacity: 1; transform: translateY(0); }
-
-    @media (min-width: 680px) {
-      .hero { padding: 9rem 0 6rem; }
-      .section { padding: 9rem 0; }
-      .pricing-box { padding: 4.5rem 3rem; }
-    }
-
-    @media (max-width: 500px) {
-      .btn-primary { width: 100%; justify-content: center; padding: 1.2rem; font-size: 1.05rem; }
-      .hero { padding-top: 5.5rem; }
-      h1 { font-size: clamp(2.4rem, 11vw, 3.4rem); }
-      .features-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .reveal { opacity: 1; transform: none; transition: none; }
-      * { animation: none !important; }
+    @media (prefers-reduced-motion: reduce){
+      *{animation:none !important;transition:none !important}
+      .reveal{opacity:1 !important;transform:none !important}
+      html{scroll-behavior:auto}
     }
   </style>
 </head>
+
 <body>
-  <div class="grid-bg"></div>
-  <div class="glow"></div>
+  <div class="grid-bg" aria-hidden="true"></div>
+  <div class="glow" aria-hidden="true"></div>
+  <div class="glow2" aria-hidden="true"></div>
 
   <nav>
-    <div class="nav-inner">
-      <a class="logo" href="#">
-        <svg width="40" height="40" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div class="wrap nav-inner">
+      <a class="logo" href="#top" aria-label="PingRAlert home">
+        <svg width="40" height="40" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <rect width="36" height="36" rx="8" fill="#0A0E1A"/>
           <ellipse cx="18" cy="8.5" rx="2" ry="1.8" fill="#E8EEFF"/>
           <path d="M10 22 Q10 13 18 13 Q26 13 26 22" stroke="#E8EEFF" stroke-width="2.2" fill="none" stroke-linecap="round"/>
@@ -365,133 +560,301 @@
         </svg>
         PingRAlert
       </a>
-      <a class="nav-cta" href="https://t.me/pingralert_bot">Open in Telegram →</a>
+
+      <div class="nav-links" aria-label="Navigation">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </div>
+
+      <a class="nav-cta" href="https://t.me/pingralert_bot" aria-label="Open PingRAlert in Telegram">Open in Telegram →</a>
     </div>
   </nav>
 
-  <main>
-    <section class="hero">
-      <div class="badge reveal">
-        <div class="badge-dot"></div>
-        Early access – launching soon
+  <main id="top">
+    <header class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="badge reveal">
+            <div class="badge-dot" aria-hidden="true"></div>
+            Early access open
+          </div>
+
+          <h1 class="reveal">
+            Clean Telegram alerts<br>
+            <span>only when the market moves</span>.
+          </h1>
+
+          <p class="hero-sub reveal">
+            Set percentage thresholds once for crypto, stocks, indices, commodities and forex.
+            Repeating alerts with smart cooldown, so you don’t get spammed.
+          </p>
+
+          <div class="ctas reveal">
+            <a class="btn primary" href="https://t.me/pingralert_bot" aria-label="Start using PingRAlert in Telegram">⚡ Start free in Telegram</a>
+            <a class="btn ghost" href="#pricing" aria-label="See pricing">See pricing</a>
+          </div>
+
+          <div class="hero-note reveal">
+            Free includes up to <strong>3 alerts</strong>. Pro removes limits and adds unlimited watchlists.
+          </div>
+
+          <div class="trust reveal" aria-label="Highlights">
+            <div class="trust-pill">✅ <strong>No email</strong> needed</div>
+            <div class="trust-pill">🧼 <strong>Cooldown</strong> cuts noise</div>
+            <div class="trust-pill">🔒 <strong>Cancel</strong> anytime</div>
+          </div>
+        </div>
+
+        <div class="preview reveal" aria-label="Telegram preview">
+          <div class="preview-top">
+            <div>
+              <div class="preview-label">Telegram preview</div>
+              <div style="font-family:'Outfit',sans-serif;font-weight:900;font-size:1.15rem;margin-top:.05rem;">
+                What you’ll receive
+              </div>
+            </div>
+            <div class="chip"><span class="dot" aria-hidden="true"></span> Sample</div>
+          </div>
+
+          <div class="bubble">
+            <div class="bubble-header">
+              <strong>BTC / USD</strong>
+              <span class="tag">PRICE MOVE</span>
+            </div>
+            <p>Price moved <strong>+3.2%</strong> in the last hour.</p>
+            <small>Rule: 3% move (repeat forever) • Cooldown active</small>
+          </div>
+
+          <div class="bubble">
+            <div class="bubble-header">
+              <strong>TSLA</strong>
+              <span class="tag">PRICE MOVE</span>
+            </div>
+            <p>Price dropped <strong>-4.8%</strong>. Alert sent once.</p>
+            <small>Rule: 5% drop • Cooldown: 45 min</small>
+          </div>
+
+          <div class="bubble" style="margin-bottom:.2rem">
+            <div class="bubble-header">
+              <strong>Watchlist</strong>
+              <span class="tag">DAILY SUMMARY</span>
+            </div>
+            <p>Biggest mover: <strong>+1.8%</strong> • Quiet assets: <strong>4</strong></p>
+            <small>Sent every morning (optional)</small>
+          </div>
+
+          <div class="preview-foot">
+            For illustration only. Not real-time market data. Not financial advice.
+          </div>
+        </div>
       </div>
+    </header>
 
-      <h1 class="reveal">
-        Clean alerts in Telegram<br>
-        <span>only when the market actually moves</span>
-      </h1>
+    <div class="divider"></div>
 
-      <p class="hero-sub reveal">
-        Set percentage thresholds once — get permanent, repeating pings with smart cooldown.<br>
-        Crypto • Stocks • Commodities • Indices • Forex — all in one bot.
-      </p>
-
-      <a href="https://t.me/pingralert_bot" class="btn-primary reveal">⚡ Start Free in Telegram</a>
-
-      <div class="telegram-preview reveal">
-        <div class="preview-header">
-          <div class="preview-label">Telegram preview – what you’ll receive</div>
+    <section id="features" class="section">
+      <div class="wrap">
+        <div class="section-label reveal">Features</div>
+        <div class="section-title reveal">Built for people who hate noise</div>
+        <div class="section-sub reveal">
+          You’re not here for a dashboard. You’re here to get pinged when something actually matters.
         </div>
 
-        <div class="msg-bubble">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:0.8rem;margin-bottom:0.5rem;">
-            <strong>BTC / USD</strong>
-            <span class="msg-tag">PRICE MOVE</span>
+        <div class="features">
+          <div class="feature reveal">
+            <div class="icon">🔔</div>
+            <h3>Alerts don’t expire</h3>
+            <p>Set it once. Your rules stay active until you delete them.</p>
           </div>
-          <p>Price moved <strong>+3.2%</strong> in the last hour.</p>
-          <div style="margin-top:0.7rem;font-size:0.88rem;color:var(--muted);">
-            Rule: 3% move (repeat forever) • Cooldown active
-          </div>
-        </div>
 
-        <div class="msg-bubble">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:0.8rem;margin-bottom:0.5rem;">
-            <strong>TSLA</strong>
-            <span class="msg-tag">PRICE MOVE</span>
+          <div class="feature reveal">
+            <div class="icon">🛡️</div>
+            <h3>Smart cooldown</h3>
+            <p>One clean ping per real move. Stops spam during sideways action.</p>
           </div>
-          <p>Price dropped <strong>–4.8%</strong>. Alert sent once.</p>
-          <div style="margin-top:0.7rem;font-size:0.88rem;color:var(--muted);">
-            Rule: 5% drop • Cooldown: 45 min
-          </div>
-        </div>
 
-        <div class="preview-footer">
-          * For illustration purposes only – not real-time market data *
+          <div class="feature reveal">
+            <div class="icon">📊</div>
+            <h3>All markets in one bot</h3>
+            <p>Crypto, stocks, indices, commodities and forex inside Telegram.</p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="icon">📈</div>
+            <h3>Percentage triggers</h3>
+            <p>Alert on +3%, -5%, ±10% moves. Repeating automatically.</p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="icon">♾️</div>
+            <h3>Unlimited on Pro</h3>
+            <p>Unlimited alerts and watchlists for heavy users.</p>
+          </div>
+
+          <div class="feature reveal">
+            <div class="icon">📋</div>
+            <h3>Daily summary</h3>
+            <p>Quick morning overview of your watchlist: movers and quiet names.</p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="section-label reveal">Features</div>
-      <h2 class="section-title reveal">Built for traders who hate noise</h2>
+    <div class="divider"></div>
 
-      <div class="features-grid">
-        <div class="feature reveal">
-          <div class="feature-icon">🔔</div>
-          <h3>Alerts never expire</h3>
-          <p>Set once — your rules stay active forever (no 90-day resets like many platforms).</p>
+    <section id="how" class="section">
+      <div class="wrap">
+        <div class="section-label reveal">How it works</div>
+        <div class="section-title reveal">3 steps, then you forget about it</div>
+        <div class="section-sub reveal">
+          You’ll spend less time watching charts and more time reacting when it matters.
         </div>
 
-        <div class="feature reveal">
-          <div class="feature-icon">♾️</div>
-          <h3>Unlimited on Pro</h3>
-          <p>Track dozens or hundreds of assets and rules — no artificial caps.</p>
+        <div class="steps">
+          <div class="step reveal">
+            <div class="num">1</div>
+            <div>
+              <h4>Open the bot</h4>
+              <p>Tap the Telegram link and start instantly.</p>
+            </div>
+          </div>
+
+          <div class="step reveal">
+            <div class="num">2</div>
+            <div>
+              <h4>Choose asset + move %</h4>
+              <p>Pick what you track and set the percentage threshold.</p>
+            </div>
+          </div>
+
+          <div class="step reveal">
+            <div class="num">3</div>
+            <div>
+              <h4>Get clean pings</h4>
+              <p>Cooldown stops repeat spam, so alerts stay useful.</p>
+            </div>
+          </div>
         </div>
 
-        <div class="feature reveal">
-          <div class="feature-icon">🛡️</div>
-          <h3>Smart cooldown</h3>
-          <p>One clean ping per meaningful move — no 20-message spam during sideways action.</p>
+        <div style="margin-top:2.2rem">
+          <div class="section-label reveal">Coverage</div>
+          <div class="section-title reveal">Track what you care about</div>
+          <div class="section-sub reveal">
+            Popular picks below. You can add more inside the bot.
+          </div>
+          <div class="assets reveal" aria-label="Coverage list">
+            <div class="asset">Bitcoin</div>
+            <div class="asset">Ethereum</div>
+            <div class="asset">Solana</div>
+            <div class="asset">Tesla</div>
+            <div class="asset">NVIDIA</div>
+            <div class="asset">Gold</div>
+            <div class="asset">S&amp;P 500</div>
+            <div class="asset">FTSE 100</div>
+            <div class="asset">Forex</div>
+            <div class="asset">+ more</div>
+          </div>
         </div>
-
-        <div class="feature reveal">
-          <div class="feature-icon">📊</div>
-          <h3>All markets, one place</h3>
-          <p>Crypto, stocks, gold, indices, forex — everything inside Telegram.</p>
-        </div>
-
-        <div class="feature reveal">
-          <div class="feature-icon">📈</div>
-          <h3>Percentage triggers</h3>
-          <p>Alert on +3%, –5%, ±10% — repeating automatically.</p>
-        </div>
-
-        <div class="feature reveal">
-          <div class="feature-icon">📋</div>
-          <h3>Daily summary</h3>
-          <p>Morning snapshot: biggest movers, quiet names, watchlist overview.</p>
-        </div>
-      </div>
-
-      <div class="assets">
-        <div class="asset-pill reveal">Bitcoin</div>
-        <div class="asset-pill reveal">Ethereum</div>
-        <div class="asset-pill reveal">Solana</div>
-        <div class="asset-pill reveal">Tesla</div>
-        <div class="asset-pill reveal">NVIDIA</div>
-        <div class="asset-pill reveal">Gold</div>
-        <div class="asset-pill reveal">S&P 500</div>
-        <div class="asset-pill reveal">FTSE 100</div>
-        <div class="asset-pill reveal">+ more</div>
       </div>
     </section>
 
-    <section class="section">
-      <div class="pricing-box reveal">
-        <div class="section-label">Pricing</div>
-        <h2 class="section-title" style="margin-bottom:1.2rem;">Simple. Fair.</h2>
+    <div class="divider"></div>
 
-        <div class="price">£9.99<small>/mo</small></div>
+    <section id="pricing" class="section">
+      <div class="wrap">
+        <div class="section-label reveal">Pricing</div>
+        <div class="section-title reveal">Start free, go Pro when you outgrow it</div>
+        <div class="section-sub reveal">
+          This is intentionally simple. Try it first, upgrade if you need unlimited rules.
+        </div>
 
-        <p style="color:var(--muted); margin:1.2rem 0 2rem; max-width:420px; margin-left:auto; margin-right:auto;">
-          Start free in Telegram. Upgrade to Pro for unlimited alerts and watchlists.
-        </p>
+        <div class="pricing">
+          <div class="price-card reveal" aria-label="Free plan">
+            <div class="price-top">
+              <div>
+                <div class="plan">Free</div>
+                <div class="price">£0<span>/mo</span></div>
+              </div>
+              <div class="plan-badge">Try it</div>
+            </div>
+            <div class="price-sub">Perfect for testing the bot and the alert quality.</div>
 
-        <a href="https://t.me/pingralert_bot" class="btn-primary">⚡ Get Started on Telegram</a>
+            <ul class="list">
+              <li><span class="check">✓</span> Up to <strong>3 alerts</strong></li>
+              <li><span class="check">✓</span> Cooldown included</li>
+              <li><span class="check">✓</span> Daily summary included</li>
+            </ul>
 
-        <p style="margin-top:1.8rem; font-size:0.9rem; color:var(--muted);">
-          Cancel anytime • No financial advice • Informational tool only
-        </p>
+            <div style="margin-top:1.2rem">
+              <a class="btn ghost" href="https://t.me/pingralert_bot" aria-label="Open bot on Telegram (Free)">Open in Telegram</a>
+            </div>
+          </div>
+
+          <div class="price-card reveal" aria-label="Pro plan">
+            <div class="price-top">
+              <div>
+                <div class="plan">Pro</div>
+                <div class="price">£9.99<span>/mo</span></div>
+              </div>
+              <div class="plan-badge">Unlimited</div>
+            </div>
+            <div class="price-sub">For people tracking multiple assets and setups.</div>
+
+            <ul class="list">
+              <li><span class="check">✓</span> Unlimited alerts</li>
+              <li><span class="check">✓</span> Unlimited watchlists</li>
+              <li><span class="check">✓</span> Persistent rules (no expiry)</li>
+              <li><span class="check">✓</span> Cooldown to cut noise</li>
+            </ul>
+
+            <div style="margin-top:1.2rem">
+              <a class="btn primary" href="https://t.me/pingralert_bot" aria-label="Open bot on Telegram (Pro)">⚡ Start in Telegram</a>
+              <div style="color:var(--muted);font-size:.9rem;margin-top:.7rem;">
+                Cancel anytime • Informational tool only
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section id="faq" class="section">
+      <div class="wrap">
+        <div class="section-label reveal">FAQ</div>
+        <div class="section-title reveal">Quick answers</div>
+        <div class="section-sub reveal">
+          The stuff people ask before they click.
+        </div>
+
+        <div class="faq">
+          <details class="q reveal">
+            <summary>Is it really free? <span class="chev" aria-hidden="true">⌄</span></summary>
+            <p>Yes. Free includes up to 3 alerts so you can test it properly. Pro removes limits.</p>
+          </details>
+
+          <details class="q reveal">
+            <summary>What markets are supported? <span class="chev" aria-hidden="true">⌄</span></summary>
+            <p>Crypto, stocks, indices, commodities and forex. You choose what you track.</p>
+          </details>
+
+          <details class="q reveal">
+            <summary>How do you stop spam alerts? <span class="chev" aria-hidden="true">⌄</span></summary>
+            <p>Cooldown logic limits repeat alerts during chop, so you get one clean ping per meaningful move.</p>
+          </details>
+
+          <details class="q reveal">
+            <summary>Is this financial advice? <span class="chev" aria-hidden="true">⌄</span></summary>
+            <p>No. It’s an informational alert tool. You make your own decisions.</p>
+          </details>
+        </div>
+
+        <div class="reveal" style="margin-top:2rem;">
+          <a class="btn primary" href="https://t.me/pingralert_bot" style="width:100%;max-width:420px;display:flex;margin:0 auto;" aria-label="Open PingRAlert on Telegram">⚡ Open PingRAlert on Telegram</a>
+        </div>
       </div>
     </section>
   </main>
@@ -502,11 +865,9 @@
   </footer>
 
   <script>
-    const observer = new IntersectionObserver(entries => {
+    const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('active');
-        }
+        if (entry.isIntersecting) entry.target.classList.add('active');
       });
     }, { threshold: 0.12 });
 
