@@ -99,10 +99,12 @@
       gap:1rem;
       padding:1rem 0;
     }
+
+    /* LOGO (UPDATED) */
     .logo{
       display:flex;
       align-items:center;
-      gap:.75rem;
+      gap:.45rem; /* was .75rem */
       font-family:"Outfit",sans-serif;
       font-weight:800;
       letter-spacing:.2px;
@@ -110,6 +112,10 @@
       text-decoration:none;
       white-space:nowrap;
     }
+    .logo svg{
+      transform: translateX(4px);
+    }
+
     .nav-links{
       display:none;
       gap:1.1rem;
@@ -726,6 +732,7 @@
       </div>
     </header>
 
+    <!-- Rest of your page unchanged -->
     <div class="divider"></div>
 
     <section id="features" class="section">
