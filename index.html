@@ -60,6 +60,7 @@
       pointer-events:none;
       z-index:-2;
       opacity:.75;
+      filter:blur(0px);
     }
     .glow2{
       position:fixed;
@@ -71,7 +72,7 @@
       opacity:.65;
     }
 
-    /* Layout */
+    /* Layout helpers */
     .wrap{
       max-width:var(--max);
       margin:0 auto;
@@ -98,10 +99,12 @@
       gap:1rem;
       padding:1rem 0;
     }
+
+    /* LOGO (UPDATED) */
     .logo{
       display:flex;
       align-items:center;
-      gap:.45rem;
+      gap:.45rem; /* was .75rem */
       font-family:"Outfit",sans-serif;
       font-weight:800;
       letter-spacing:.2px;
@@ -109,7 +112,10 @@
       text-decoration:none;
       white-space:nowrap;
     }
-    .logo svg{ transform: translateX(4px); }
+    .logo svg{
+      transform: translateX(4px);
+    }
+
     .nav-links{
       display:none;
       gap:1.1rem;
@@ -238,7 +244,7 @@
       border-color:rgba(0,212,133,.35);
     }
     .hero-note{
-      margin-top:.85rem;
+      margin-top:.95rem;
       color:var(--muted);
       font-size:.92rem;
     }
@@ -263,60 +269,6 @@
     }
     .trust-pill strong{color:var(--white);font-weight:800}
     .trust-pill:hover{border-color:rgba(0,212,133,.28);color:var(--white)}
-
-    /* NEW: Ticker strip */
-    .ticker{
-      margin-top:1.15rem;
-      border:1px solid var(--border);
-      background:rgba(255,255,255,.03);
-      border-radius:16px;
-      overflow:hidden;
-      position:relative;
-    }
-    .ticker::before,
-    .ticker::after{
-      content:"";
-      position:absolute;
-      top:0; bottom:0;
-      width:50px;
-      z-index:2;
-      pointer-events:none;
-    }
-    .ticker::before{
-      left:0;
-      background:linear-gradient(90deg, rgba(10,14,26,1), rgba(10,14,26,0));
-    }
-    .ticker::after{
-      right:0;
-      background:linear-gradient(270deg, rgba(10,14,26,1), rgba(10,14,26,0));
-    }
-    .ticker-track{
-      display:flex;
-      gap:1.2rem;
-      padding:.7rem .9rem;
-      width:max-content;
-      animation:tickerMove 22s linear infinite;
-    }
-    .ticker:hover .ticker-track{ animation-play-state: paused; }
-    @keyframes tickerMove{
-      from{ transform: translateX(0); }
-      to{ transform: translateX(-50%); }
-    }
-    .tick{
-      display:inline-flex;
-      align-items:center;
-      gap:.55rem;
-      white-space:nowrap;
-      color:rgba(241,245,249,.9);
-      font-size:.92rem;
-      padding:.25rem .55rem;
-      border-radius:999px;
-      border:1px solid rgba(255,255,255,.06);
-      background:rgba(255,255,255,.02);
-    }
-    .tick b{ font-family:"Outfit",sans-serif; font-weight:900; }
-    .up{ color: var(--teal); font-weight:900; }
-    .down{ color: #ff6b6b; font-weight:900; } /* only explicit non-teal color used */
 
     /* Telegram preview card */
     .preview{
@@ -461,12 +413,6 @@
       margin-bottom:.45rem;
     }
     .card p{color:var(--muted)}
-
-    /* NEW: Mid CTA */
-    .mid-cta{
-      margin-top:2.2rem;
-      text-align:center;
-    }
 
     /* How it works */
     .steps{
@@ -657,18 +603,17 @@
       .pricing{grid-template-columns: repeat(2, 1fr)}
       .wrap{padding:0 2rem}
     }
+
     @media (max-width: 520px){
       .btn-primary,.btn-secondary{width:100%}
       .hero-ctas{flex-direction:column; align-items:stretch}
       .badge{width:100%; justify-content:center}
-      .ticker-track{ animation-duration: 18s; }
     }
 
     @media (prefers-reduced-motion: reduce){
       *{animation:none !important;transition:none !important}
       .reveal{opacity:1 !important;transform:none !important}
       html{scroll-behavior:auto}
-      .ticker-track{animation:none !important}
     }
   </style>
 </head>
@@ -729,40 +674,14 @@
             <a class="btn-secondary" href="#pricing" aria-label="See pricing">See pricing</a>
           </div>
 
-          <!-- UPDATED: clear Free vs Pro -->
           <div class="hero-note reveal">
-            Free: 3 alerts. Pro: unlimited alerts + watchlists.
-          </div>
-
-          <!-- NEW: ticker strip (demo) -->
-          <div class="ticker reveal" aria-label="Demo market ticker">
-            <div class="ticker-track" aria-hidden="true">
-              <div class="tick"><b>BTC</b> $72,000 <span class="up">+3.8%</span></div>
-              <div class="tick"><b>TSLA</b> $198.12 <span class="down">-2.1%</span></div>
-              <div class="tick"><b>GOLD</b> $2,145 <span class="up">+0.6%</span></div>
-              <div class="tick"><b>NVDA</b> $905.40 <span class="up">+1.4%</span></div>
-              <div class="tick"><b>FTSE</b> 7,640 <span class="down">-0.3%</span></div>
-              <div class="tick"><b>EUR/USD</b> 1.085 <span class="up">+0.2%</span></div>
-
-              <!-- duplicate for seamless loop -->
-              <div class="tick"><b>BTC</b> $72,000 <span class="up">+3.8%</span></div>
-              <div class="tick"><b>TSLA</b> $198.12 <span class="down">-2.1%</span></div>
-              <div class="tick"><b>GOLD</b> $2,145 <span class="up">+0.6%</span></div>
-              <div class="tick"><b>NVDA</b> $905.40 <span class="up">+1.4%</span></div>
-              <div class="tick"><b>FTSE</b> 7,640 <span class="down">-0.3%</span></div>
-              <div class="tick"><b>EUR/USD</b> 1.085 <span class="up">+0.2%</span></div>
-            </div>
+            Free to try. Upgrade to Pro for unlimited alerts.
           </div>
 
           <div class="trust-row reveal" aria-label="Trust highlights">
             <div class="trust-pill">✅ <strong>No email</strong> needed</div>
             <div class="trust-pill">🧼 <strong>Cooldown</strong> reduces spam</div>
             <div class="trust-pill">🔒 <strong>Cancel</strong> anytime</div>
-          </div>
-
-          <!-- NEW: privacy note (only keep if true) -->
-          <div class="hero-note reveal" style="margin-top:.65rem;">
-            Privacy-first: stores alert settings only.
           </div>
         </div>
 
@@ -774,7 +693,7 @@
                 What you’ll see in Telegram
               </div>
             </div>
-            <div class="status"><span class="dot" aria-hidden="true"></span> Preview (demo)</div>
+            <div class="status"><span class="dot" aria-hidden="true"></span> Sample</div>
           </div>
 
           <div class="bubble">
@@ -813,6 +732,7 @@
       </div>
     </header>
 
+    <!-- Rest of your page unchanged -->
     <div class="divider"></div>
 
     <section id="features" class="section">
@@ -861,13 +781,6 @@
             <h3>Daily summary</h3>
             <p>Quick morning overview: biggest movers and quiet assets on your list.</p>
           </div>
-        </div>
-
-        <!-- NEW: mid-page CTA -->
-        <div class="mid-cta reveal">
-          <a class="btn-primary" href="https://t.me/pingralert_bot" aria-label="Open PingRAlert on Telegram from Features">
-            ⚡ Open PingRAlert on Telegram
-          </a>
         </div>
       </div>
     </section>
@@ -956,7 +869,7 @@
             <div class="price-sub">Try the bot and see if the pings fit your style.</div>
 
             <ul class="ul">
-              <li><span class="check">✓</span> Up to 3 alerts</li>
+              <li><span class="check">✓</span> Create a small number of alerts</li>
               <li><span class="check">✓</span> Smart cooldown included</li>
               <li><span class="check">✓</span> Daily summary included</li>
             </ul>
@@ -1012,7 +925,7 @@
               Is it really free?
               <span class="chev" aria-hidden="true">⌄</span>
             </summary>
-            <p>Yes. Free lets you try the bot with up to 3 alerts. Pro is unlimited.</p>
+            <p>Yes. Free lets you try the bot. Pro is for unlimited alerts and heavier use.</p>
           </details>
 
           <details class="faq reveal">
@@ -1038,15 +951,6 @@
             </summary>
             <p>No. It’s an alert tool for information only. You make your own decisions.</p>
           </details>
-
-          <!-- NEW: privacy + support -->
-          <details class="faq reveal">
-            <summary>
-              What do you store?
-              <span class="chev" aria-hidden="true">⌄</span>
-            </summary>
-            <p>Alert settings (your rules and watchlist). Keep this accurate to how your bot actually works.</p>
-          </details>
         </div>
 
         <div class="reveal" style="margin-top:2rem; text-align:center;">
@@ -1058,8 +962,6 @@
 
   <footer>
     © 2026 PingRAlert • <a href="https://t.me/pingralert_bot">@pingralert_bot</a><br>
-    Support: <a href="mailto:support@pingralert.com">support@pingralert.com</a> •
-    <a href="privacy.html">Privacy</a> • <a href="terms.html">Terms</a><br>
     For informational purposes only. Not financial advice.
   </footer>
 
@@ -1073,9 +975,6 @@
     }, { threshold: 0.14 });
 
     els.forEach(el => obs.observe(el));
-
-    // Ensure ticker loop is seamless by duplicating content if needed (safe no-op)
-    // (No external assets, works on GitHub Pages)
   </script>
 </body>
 </html>
