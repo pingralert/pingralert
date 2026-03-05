@@ -16,7 +16,6 @@
       --border: rgba(255,255,255,0.08);
       --radius: 14px;
     }
-
     * { margin:0; padding:0; box-sizing:border-box; }
     html { scroll-behavior: smooth; }
     body {
@@ -26,20 +25,16 @@
       line-height: 1.6;
       min-height: 100vh;
     }
-
-    /* Light subtle grid (no fixed heavy noise) */
     .grid-bg {
       position: fixed;
       inset: 0;
-      background-image: 
+      background-image:
         linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
       background-size: 60px 60px;
       pointer-events: none;
       z-index: -2;
     }
-
-    /* Softer glow – positioned better on mobile */
     .glow {
       position: fixed;
       width: 500px; height: 500px;
@@ -58,8 +53,6 @@
       z-index: -1;
       opacity: 0.6;
     }
-
-    /* Nav – sticky, simpler on mobile */
     nav {
       position: sticky;
       top: 0;
@@ -91,8 +84,6 @@
       transition: all 0.25s;
     }
     .nav-cta:hover { opacity: 0.92; transform: translateY(-1px); }
-
-    /* Hero */
     .hero {
       text-align: center;
       padding: 7rem 1.5rem 5rem;
@@ -119,7 +110,6 @@
       animation: pulse 2.2s infinite;
     }
     @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(0.75); } }
-
     h1 {
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
@@ -134,7 +124,6 @@
       max-width: 620px;
       margin: 0 auto 2.5rem;
     }
-
     .btn-primary {
       display: inline-flex;
       align-items: center;
@@ -152,8 +141,6 @@
       transform: translateY(-2px);
       box-shadow: 0 12px 32px rgba(0,212,133,0.28);
     }
-
-    /* Chart – simpler, taller on mobile */
     .chart-wrapper {
       max-width: 800px;
       margin: 3rem auto 1rem;
@@ -169,8 +156,6 @@
     svg.chart { width: 100%; height: 120px; }
     .chart-line { fill: none; stroke: var(--teal); stroke-width: 2.5; }
     .chart-fill { fill: url(#grad); opacity: 0.18; }
-
-    /* Sections */
     .section {
       padding: 6rem 1.5rem;
       max-width: 1000px;
@@ -190,7 +175,6 @@
       font-size: clamp(1.8rem, 6vw, 2.8rem);
       margin-bottom: 3rem;
     }
-
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -208,7 +192,6 @@
       border-color: rgba(0,212,133,0.35);
     }
     .feature-icon { font-size: 2.4rem; margin-bottom: 1rem; }
-
     .assets-row {
       display: flex;
       flex-wrap: wrap;
@@ -228,8 +211,6 @@
       border-color: var(--teal);
       color: var(--teal);
     }
-
-    /* CTA */
     .cta-section {
       padding: 6rem 1.5rem;
       text-align: center;
@@ -250,8 +231,6 @@
       margin: 1rem 0;
     }
     .price-tag span { font-size: 1.4rem; color: var(--muted); }
-
-    /* Footer */
     footer {
       text-align: center;
       padding: 3rem 1.5rem;
@@ -259,14 +238,8 @@
       border-top: 1px solid var(--border);
       font-size: 0.9rem;
     }
-
-    /* Scroll reveal */
     .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease; }
     .reveal.active { opacity: 1; transform: translateY(0); }
-
-    /* ────────────────────────────────────────
-       MOBILE-FIRST MEDIA QUERIES
-    ──────────────────────────────────────── */
     @media (min-width: 640px) {
       nav { padding: 1.5rem 3rem; }
       .hero { padding: 10rem 3rem 7rem; }
@@ -274,12 +247,10 @@
       .chart-card { padding: 2rem; }
       svg.chart { height: 140px; }
     }
-
     @media (min-width: 900px) {
       .glow, .glow2 { opacity: 0.8; }
       .cta-box { padding: 5rem 4rem; }
     }
-
     @media (max-width: 480px) {
       .btn-primary {
         width: 100%;
@@ -330,10 +301,10 @@
     <div class="chart-card">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:1rem;">
         <div>
-          <div style="color:var(--muted); font-size:0.9rem;">BTC / USD – Live</div>
-          <div style="font-size:1.6rem; font-weight:800;">$87,432 <span style="color:var(--teal); font-size:1rem;">+4.2%</span></div>
+          <div style="color:var(--muted); font-size:0.9rem;">BTC / USD – Example</div>
+          <div style="font-size:1.6rem; font-weight:800;">$72,000 <span style="color:var(--teal); font-size:1rem;">+3.8%</span></div>
         </div>
-        <div style="font-size:0.85rem; color:var(--muted);">Just now</div>
+        <div style="font-size:0.85rem; color:var(--muted);">Illustrative</div>
       </div>
       <svg class="chart" viewBox="0 0 600 120" preserveAspectRatio="none">
         <defs>
@@ -342,10 +313,15 @@
             <stop offset="100%" stop-color="#00d485" stop-opacity="0"/>
           </linearGradient>
         </defs>
-        <path class="chart-fill" d="M0,100 L50,90 L100,95 L150,75 L200,65 L250,72 L300,50 L350,35 L400,45 L450,20 L500,10 L550,25 L600,8 L600,120 L0,120 Z"/>
-        <path class="chart-line" d="M0,100 L50,90 L100,95 L150,75 L200,65 L250,72 L300,50 L350,35 L400,45 L450,20 L500,10 L550,25 L600,8"/>
+        <path class="chart-fill" d="M0,100 L50,92 L100,88 L150,78 L200,70 L250,75 L300,55 L350,40 L400,48 L450,25 L500,18 L550,30 L600,12 L600,120 L0,120 Z"/>
+        <path class="chart-line" d="M0,100 L50,92 L100,88 L150,78 L200,70 L250,75 L300,55 L350,40 L400,48 L450,25 L500,18 L550,30 L600,12"/>
       </svg>
-      <div style="margin-top:1.2rem; color:var(--teal); font-size:0.9rem;">Alert: +4.2% move • Mar 5, 2026</div>
+      <div style="margin-top:1.2rem; color:var(--muted); font-size:0.85rem; text-align:center;">
+        *For illustration purposes only – not real-time or actual market data*
+      </div>
+      <div style="margin-top:0.6rem; color:var(--teal); font-size:0.9rem; text-align:center;">
+        Example Alert: +3.8% move detected
+      </div>
     </div>
   </div>
 
@@ -417,7 +393,6 @@
   </footer>
 
   <script>
-    // Simple intersection observer for reveals
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -425,7 +400,6 @@
         }
       });
     }, { threshold: 0.15 });
-
     document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
   </script>
 </body>
